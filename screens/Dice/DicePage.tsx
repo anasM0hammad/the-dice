@@ -19,7 +19,7 @@ declare const window: any;
 
 export default function DicePage() {
   const [isRolling, setIsRolling] = useState(false);
-  const [currentNumber, setCurrentNumber] = useState(1);
+  const [currentNumber, setCurrentNumber] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [customFaceValues, setCustomFaceValues] = useState<string[]>([]);
   const audioRef = useRef<any>(null);
@@ -98,6 +98,7 @@ export default function DicePage() {
 
   const handleRoll = () => {
     if (!isRolling) {
+      setCurrentNumber(0);
       setIsRolling(true);
       playSound();
     }
@@ -139,9 +140,9 @@ export default function DicePage() {
       </View>
 
       <View style={styles.resultContainer}>
-        <Text style={styles.resultLabel}>Result</Text>
+        {/* <Text style={styles.resultLabel}>Result</Text> */}
         <Text style={styles.resultNumber}>
-          {hasCustomValues ? customFaceValues[currentNumber - 1] : currentNumber}
+          {currentNumber ? (hasCustomValues ? customFaceValues[currentNumber - 1] : currentNumber) : '...'}
         </Text>
       </View>
 
