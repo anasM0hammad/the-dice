@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, Platform } from 'react-native
 import { StatusBar } from 'expo-status-bar';
 import Dice3D from '../../components/Dice3D';
 import CustomFacesModal from './CustomFacesModal';
+import { Accelerometer } from 'expo-sensors';
 
 // Conditionally import expo-av only for native platforms
 let Audio: any = null;
@@ -22,8 +23,10 @@ export default function DicePage() {
   const [currentNumber, setCurrentNumber] = useState(0);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [customFaceValues, setCustomFaceValues] = useState<string[]>([]);
+  const [accelerometerData, setAccelerometerData] = useState({ x: 0, y: 0, z: 0});
   const audioRef = useRef<any>(null);
   const soundRef = useRef<any>(null);
+  const SHAKE_THRESHOLD = 1.5;
 
   useEffect(() => {
     if (Platform.OS === 'web') {
@@ -50,6 +53,26 @@ export default function DicePage() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    let subscription;
+    subscription = Accelerometer.addListener((accData ) => setAccelerometerData(accData));
+
+    if(subscription){
+      subscription.remove();
+    }
+  }, []);
+
+  useEffect(() => {
+    const totalForce = Math.abs(accelerometerData.x) + Math.abs(accelerometerData.y) + Math.abs(accelerometerData.z);
+    if(totalForce > SHAKE_THRESHOLD){
+      // Do nothing if already shaking or rolling 
+      if(isRolling) return;
+
+      // Roll the dice on shake
+      handleRoll();
+    }
+  }, [accelerometerData]);
 
   const setupAudio = async () => {
     try {
